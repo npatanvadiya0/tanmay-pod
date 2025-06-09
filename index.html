@@ -1,167 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Interactive Audio Learning</title>
-<style>
-#heading {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #2a2a72;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Audio Learning</title>
+  <style>
+    #heading {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #2a2a72;
+    }
+    #heading h1 {
+      font-size: 2.8rem;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    #heading h2 {
+      font-size: 1.5rem;
+      margin: 0;
+      margin-top: 0.3rem;
+      font-weight: 500;
+      font-style: italic;
+      color: #555;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f4f4f4;
+      overflow-x: hidden;
+    }
+    #container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    audio {
+      width: 100%;
+      outline: none;
+      margin-bottom: 1rem;
+    }
+    #transcript {
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      line-height: 1.3rem;
+      background: #eee;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 1rem;
+    }
+    .transcript-line {
+      padding: 3px 5px;
+      cursor: pointer;
+    }
+    .transcript-line.active {
+      background: #cce5ff;
+    }
 
-#heading h1 {
-  font-size: 2.8rem;
-  margin: 0;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
+    #progressBarContainer {
+      width: 100%;
+      height: 15px;
+      background: #ddd;
+      border-radius: 7px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    #progressBar {
+      height: 100%;
+      background: #4285f4;
+      width: 0%;
+    }
+    .cue-point {
+      position: absolute;
+      top: 0;
+      width: 10px;
+      height: 15px;
+      background: orange;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+    .cue-point:hover {
+      opacity: 1;
+    }
 
-#heading h2 {
-  font-size: 1.5rem;
-  margin: 0;
-  margin-top: 0.3rem;
-  font-weight: 500;
-  font-style: italic;
-  color: #555;
-}
+    #questionModalOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #questionModal {
+      background: white;
+      padding: 2rem;
+      max-width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    #questionText {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .options {
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+    .option {
+      display: block;
+      margin: 0.4rem 0;
+    }
+    button#submitAnswer {
+      background: #4285f4;
+      border: none;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button#submitAnswer:disabled {
+      background: #999;
+      cursor: default;
+    }
+    #feedbackMessage {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
 
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0; padding: 0;
-    background: #f4f4f4;
-    overflow-x: hidden;
-  }
-  #container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 1rem;
-    background: white;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    position: relative;
-  }
-  audio {
-    width: 100%;
-    outline: none;
-    margin-bottom: 1rem;
-  }
-  #transcript {
-    max-height: 150px;
-    overflow-y: auto;
-    font-size: 0.9rem;
-    line-height: 1.3rem;
-    background: #eee;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-  }
-  .transcript-line {
-    padding: 3px 5px;
-    cursor: pointer;
-  }
-  .transcript-line.active {
-    background: #cce5ff;
-  }
-
-  /* Progress bar container */
-  #progressBarContainer {
-    width: 100%;
-    height: 15px;
-    background: #ddd;
-    border-radius: 7px;
-    overflow: hidden;
-    margin-bottom: 1rem;
-    position: relative;
-  }
-  #progressBar {
-    height: 100%;
-    background: #4285f4;
-    width: 0%;
-  }
-  /* Question cue points on progress bar */
-  .cue-point {
-    position: absolute;
-    top: 0;
-    width: 10px;
-    height: 15px;
-    background: orange;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.3s;
-  }
-  .cue-point:hover {
-    opacity: 1;
-  }
-
-  /* Modal background blur */
-  #questionModalOverlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(5px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  /* Modal container */
-  #questionModal {
-    background: white;
-    padding: 2rem;
-    max-width: 400px;
-    border-radius: 10px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.3);
-    text-align: center;
-  }
-  #questionText {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-  }
-  .options {
-    text-align: left;
-    margin-bottom: 1rem;
-  }
-  .option {
-    display: block;
-    margin: 0.4rem 0;
-  }
-  button#submitAnswer {
-    background: #4285f4;
-    border: none;
-    color: white;
-    padding: 0.5rem 1.2rem;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  button#submitAnswer:disabled {
-    background: #999;
-    cursor: default;
-  }
-  #feedbackMessage {
-    margin-top: 0.5rem;
-    font-weight: bold;
-  }
-</style>
+    button, label {
+      touch-action: manipulation;
+    }
+    input[type="radio"] {
+      accent-color: #4285f4;
+    }
+  </style>
 </head>
 <body>
 <div id="container">
-<div id="heading">
-  <h1>Growzy Podcast</h1>
-  <h2>Second Order Thinking</h2>
-</div>
+  <div id="heading">
+    <h1>Growzy Podcast</h1>
+    <h2>Second Order Thinking</h2>
+  </div>
   <audio id="audio" controls preload="metadata">
     <source src="audio.mp3" type="audio/mpeg" />
     Your browser does not support the audio element.
   </audio>
-
   <div id="progressBarContainer">
     <div id="progressBar"></div>
   </div>
-
   <div id="transcript"></div>
 </div>
 
@@ -169,369 +167,30 @@
 <div id="questionModalOverlay">
   <div id="questionModal">
     <div id="questionText"></div>
-    <form id="optionsForm" class="options"></form>
-    <button id="submitAnswer" disabled>Submit</button>
+    <form id="optionsForm" class="options" onsubmit="return false;">
+      <!-- Radio buttons inserted here -->
+      <button id="submitAnswer" type="submit" disabled>Submit</button>
+    </form>
     <div id="feedbackMessage"></div>
   </div>
 </div>
 
-<!-- Success and Error sounds -->
-<audio id="successSound" src="Success.mp3" preload="auto"></audio>
+<!-- Sounds -->
+<audio id="successSound" src="success.wav" preload="auto"></audio>
 <audio id="errorSound" src="error-sound.mp3" preload="auto"></audio>
 
 <script>
-  // Transcript data with timestamps in seconds and text
-  const transcript = [
-  { time: 1, text: "It's Tuesday morning, the kind where the sky is still figuring itself out, half sunlight, half fog." },
-  { time: 8, text: "A desk lamp glows in a quiet apartment." },
-  { time: 11, text: "Steam rises from a chipped coffee mug, and Alex is sitting still, focused, staring into a screen like it holds the answer to everything." },
-  { time: 21, text: "His inbox is packed, deadlines, slack pings." },
-  { time: 25, text: "A reminder to call mom, but one subject line stands out, bold, unread." },
-  { time: 31, text: "It says, congratulations, Alex, you've been selected." },
-  { time: 35, text: "Wait, is this, oh my God, I got it." },
-  { time: 38, text: "I actually got it." },
-  { time: 40, text: "His heart skips." },
-  { time: 42, text: "He double checks the sender." },
-  { time: 43, text: "Yes, it's from the VP." },
-  { time: 45, text: "This is real." },
-  { time: 47, text: "Lead the product launch." },
-  { time: 48, text: "This is huge." },
-  { time: 49, text: "This is what I've been waiting for all those extra hours, all those skipped weekends, this is it, my shot." },
-  { time: 56, text: "No hesitation, no pause." },
-  { time: 58, text: "He types back, thank you so much for this opportunity." },
-  { time: 60, text: "I'm honored." },
-  { time: 61, text: "I accept." },
-  { time: 63, text: "And just like that, everything changes. He walks a little taller that day." },
-  { time: 69, text: "Colleagues nod, slack DMs light up." },
-  { time: 72, text: "He's the guy now." },
-  { time: 73, text: "I did it." },
-  { time: 74, text: "Time to prove myself, time to level up." },
-  { time: 77, text: "But here's the thing about quick yeses, they come with long tails." },
-  { time: 82, text: "That one reply, that single yes." },
-  { time: 85, text: "It didn't just change his title, it changed his life." },
-  { time: 90, text: "The next few days are a blur, meetings stacked, teams behind schedule, the product still buggy." },
-  { time: 96, text: "OK, no problem, I'll push harder, skip lunch, sleep less, grind mode on." },
-  { time: 104, text: "The pressure mounts, he misses calls, forgets birthdays, he stops going to the gym." },
-  { time: 111, text: "He tells himself this is just the hustle, just temporary, but the body keeps score, so does the mind." },
-  { time: 118, text: "I'm fine." },
-  { time: 119, text: "I can handle this." },
-  { time: 120, text: "Just one more late night." },
-  { time: 122, text: "But it's not just one, it's weeks." },
-  { time: 125, text: "And then the launch fails. Bugs slipped through, the data didn't sync, the user feedback brutal." },
-  { time: 134, text: "The team quiet." },
-  { time: 136, text: "The silence says it all." },
-  { time: 139, text: "What happened?" },
-  { time: 140, text: "I thought this was supposed to be the win." },
-  { time: 142, text: "Why do I feel worse than before?" },
-  { time: 144, text: "And that moment right there was when Alex finally paused, not because he wanted to, but because life forced him to." },
-  { time: 155, text: "He sat at his desk, same coffee mug, same lamp, but with a heavier heart." },
-  { time: 160, text: "He didn't regret saying yes, but for the first time, he wished he'd asked one question before he did." },
-  { time: 167, text: "What comes after this?" },
-  { time: 170, text: "You're listening to Growzy, where we unpack the stories behind the choices we make and how a little awareness can change everything." },
-  { time: 179, text: "In just a moment, Maya joins us to talk about the mental skill that Alex didn't use, but could have changed everything." },
-  { time: 186, text: "Stick around." },
-  { time: 197, text: "So what went wrong?" },
-  { time: 200, text: "Alex was smart, hardworking, capable." },
-  { time: 203, text: "He didn't lack skill, he lacked space." },
-  { time: 206, text: "The space between stimulus and response, between opportunity and decision." },
-  { time: 211, text: "He said yes in 2 seconds." },
-  { time: 213, text: "And paid for it in 6 weeks." },
-  { time: 218, text: "I kept thinking, I can fix this." },
-  { time: 221, text: "I just need more time." },
-  { time: 223, text: "But time was the one thing I didn't have." },
-  { time: 226, text: "The team looked exhausted, deadlines blurred into each other." },
-  { time: 230, text: "I could see it in their faces, they needed a leader, but I was barely holding on." },
-  { time: 237, text: "This wasn't the win he imagined." },
-  { time: 239, text: "He started avoiding calls, delaying updates, dreading Mondays." },
-  { time: 243, text: "That moment of glory faded into a fog." },
-  { time: 247, text: "To decode this kind of moment, the fast yes, the slow regret, I invited Maya, a coach who's helped dozens of people rethink their choices." },
-  { time: 254, text: "You know what's funny?" },
-  { time: 255, text: "I've been Alex." },
-  { time: 257, text: "Well, not exactly, but I once took on a freelance project that sounded amazing on paper." },
-  { time: 262, text: "Great pay, high profile client, tight deadline, but hey, I like a challenge." },
-  { time: 268, text: "So I said yes, immediately, no questions, no conditions, just yes." },
-  { time: 274, text: "And for 3 months, I was miserable." },
-  { time: 277, text: "We call it the opportunity rush." },
-  { time: 279, text: "It hits hard, fast, and it feels good, like dopamine dressed in a blazer." },
-  { time: 283, text: "Exactly." },
-  { time: 284, text: "But then it shows up with a suitcase full of stress, anxiety, and 3 a.m. emails." },
-  { time: 290, text: "Looking back, I realized I never thought beyond the offer." },
-  { time: 294, text: "I didn't ask, what else does this choice come with?" },
-  { time: 297, text: "What would it cost me?" },
-  { time: 298, text: "Time, energy, mental peace?" },
-  { time: 301, text: "That's the heart of it." },
-  { time: 302, text: "Most of us make decisions by only looking at the first step." },
-  { time: 305, text: "A new job, a new habit?" },
-  { time: 308, text: "A yes to something shiny." },
-  { time: 311, text: "But what if we trained ourselves to ask, and then what?" },
-  { time: 314, text: "That's 2nd order thinking." },
-  { time: 316, text: "It's like looking at the ripples after the stone hits the water, the invisible consequences." },
-  { time: 321, text: "Imagine Alex had paused just for a moment and asked if I say yes." },
-  { time: 326, text: "What happens to my health, my team, my evenings, would he still have accepted?" },
-  { time: 330, text: "Maybe, but he'd have prepared differently." },
-  { time: 333, text: "Maybe asked for more support, rescheduled personal projects, set boundaries." },
-  { time: 338, text: "We're not saying don't go after big wins." },
-  { time: 341, text: "We're saying don't trade clarity for speed." },
-  { time: 343, text: "You can move fast and think deep." },
-  { time: 345, text: "If you give yourself just a little room to zoom out." },
-  { time: 348, text: "And Alex, he learned that the hard way, but sometimes the hard way is the most honest teacher." },
-  { time: 355, text: "Coming up after the break, we'll talk about how Alex rebuilt from that burnout, and how you can start practicing second-order thinking in your day to day." },
-  { time: 363, text: "And we'll leave you with a tiny simple challenge to help you grow with every choice you make." },
-  { time: 369, text: "Stay with us." },
-  { time: 382, text: "So, what happened to Alex?" },
-  { time: 385, text: "Did he crash and burn?" },
-  { time: 387, text: "Not exactly, but he came close." },
-  { time: 390, text: "It wasn't one big event." },
-  { time: 391, text: "It was the accumulation of hundreds of small yeses, each one dragging him deeper into burnout, until one day he did something he hadn't done in weeks." },
-  { time: 401, text: "He stopped. I just sat there, laptop open, calendar full, and I thought, what if I didn't say yes so fast?" },
-  { time: 414, text: "What if every yes is a no to something else?" },
-  { time: 419, text: "He didn't have language for it back then." },
-  { time: 421, text: "But that was the birth of second order thinking." },
-  { time: 425, text: "He went back to that email thread, reread his response." },
-  { time: 429, text: "Wondered what if I had said, thanks, can I have a day to think about it?" },
-  { time: 434, text: "Simple, right, but powerful, because between impulse and action lies something very rare, wisdom." },
-  { time: 442, text: "When I started practicing second order thinking, I used to write it out." },
-  { time: 446, text: "I'd ask myself, if I say yes, what does that actually mean?" },
-  { time: 450, text: "What happens next week, next month?" },
-  { time: 453, text: "What am I assuming that might not be true?" },
-  { time: 456, text: "And you know what?" },
-  { time: 458, text: "Just those questions slowed me down enough to make better choices, not faster ones." },
-  { time: 463, text: "Here's something to try." },
-  { time: 465, text: "Think of a decision you made quickly this week." },
-  { time: 467, text: "Anything, committing to a meeting, agreeing to a plan." },
-  { time: 472, text: "Now rewind. Ask yourself, what did I not consider?" },
-  { time: 477, text: "What dominoes did I ignore?" },
-  { time: 479, text: "That's 2nd order thinking and like any muscle, the more you use it, the sharper it gets." },
-  { time: 484, text: "Second order thinking isn't about overthinking, it's about clear thinking, not just reacting but responding with intention." },
-  { time: 493, text: "I started small." },
-  { time: 494, text: "When someone asked me to join a late night sync, I didn't reply instantly." },
-  { time: 498, text: "I thought, if I say yes to this, will I have the energy for tomorrow's big pitch?" },
-  { time: 505, text: "Sometimes I still said yes." },
-  { time: 507, text: "But now, it was a conscious yes." },
-  { time: 512, text: "Second order thinking won't change your life overnight, but it changes your days and when your days change, your life catches up." },
-  { time: 519, text: "It's like planting trees you may never sit under, but knowing the shade is coming." },
-  { time: 524, text: "So here's your Growzy challenge." },
-  { time: 526, text: "This week, before you say yes to anything, a meeting, a favor, a snack, a scroll through Instagram, ask yourself, and then what?" },
-  { time: 534, text: "That's it." },
-  { time: 536, text: "Pause, breathe, predict." },
-  { time: 538, text: "And remember, it's not about perfection, it's about practice." },
-  { time: 542, text: "You're not just choosing, you're training your future." },
-  { time: 545, text: "We'll be back next week with another story, another mindset, and more tools to grow with intention." },
-  { time: 550, text: "But for now, close that extra tab." },
-  { time: 553, text: "Step outside, give yourself space to think." },
-  { time: 556, text: "This was Growzy, and you're doing better than you think." }
-];
+  // Add your existing transcript and questions JS code here (unchanged)
 
-
-  // Questions triggered at these audio times (seconds)
-  const questions = [
-    {
-      time: 63,
-      question: "What important action did Alex take at this moment?",
-      options: [
-        "He declined the offer.",
-        "He accepted the offer.",
-        "He ignored the email.",
-        "He replied with questions."
-      ],
-      correct: 1 // index of correct option
-    },
-    {
-      time: 82,
-      question: "What does the phrase 'quick yeses come with long tails' imply?",
-      options: [
-        "Quick decisions have lasting consequences.",
-        "Quick yes means instant success.",
-        "Saying yes is always good.",
-        "Long tails are positive."
-      ],
-      correct: 0
-    },
-    {
-      time: 139,
-      question: "What happened after the product launch?",
-      options: [
-        "The launch was a big success.",
-        "The launch failed due to bugs and bad feedback.",
-        "The team celebrated the success.",
-        "Everything went smoothly."
-      ],
-      correct: 1
-    },
-    {
-      time: 166,
-      question: "What critical question did Alex wish he had asked?",
-      options: [
-        "What comes after this?",
-        "How much will I get paid?",
-        "Who will lead the team?",
-        "When is the next meeting?"
-      ],
-      correct: 0
-    }
-  ];
-
-  // Elements
-  const audio = document.getElementById('audio');
-  const transcriptDiv = document.getElementById('transcript');
-  const progressBar = document.getElementById('progressBar');
-  const progressBarContainer = document.getElementById('progressBarContainer');
-
-  const modalOverlay = document.getElementById('questionModalOverlay');
-  const questionText = document.getElementById('questionText');
-  const optionsForm = document.getElementById('optionsForm');
+  // Just update this part:
   const submitBtn = document.getElementById('submitAnswer');
-  const feedbackMessage = document.getElementById('feedbackMessage');
-
-  const successSound = document.getElementById('successSound');
-  const errorSound = document.getElementById('errorSound');
-
-  let currentQuestionIndex = 0;
-  let questionShown = false;
-
-  // Build transcript visually
-  transcript.forEach((line, idx) => {
-    const p = document.createElement('p');
-    p.className = 'transcript-line';
-    p.textContent = line.text;
-    p.dataset.time = line.time;
-    p.id = 'transcript-line-' + idx;
-    transcriptDiv.appendChild(p);
-
-    p.addEventListener('click', () => {
-      audio.currentTime = line.time;
-      audio.play();
-    });
-  });
-
-  // Add cue points on progress bar for questions
-  function addCuePoints() {
-    questions.forEach(q => {
-      const cue = document.createElement('div');
-      cue.className = 'cue-point';
-      const posPercent = (q.time / audio.duration) * 100;
-      cue.style.left = `calc(${posPercent}% - 5px)`;
-      cue.title = `Question at ${formatTime(q.time)}`;
-      cue.addEventListener('click', () => {
-        audio.currentTime = q.time;
-        audio.play();
-      });
-      progressBarContainer.appendChild(cue);
-    });
-  }
-
-  // Format seconds as mm:ss
-  function formatTime(sec) {
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${s < 10 ? '0' + s : s}`;
-  }
-
-  // Highlight transcript line based on current time
-  function highlightTranscript(time) {
-    transcript.forEach((line, idx) => {
-      const el = document.getElementById('transcript-line-' + idx);
-      if (time >= line.time && (idx === transcript.length -1 || time < transcript[idx+1].time)) {
-        el.classList.add('active');
-        // Scroll to visible
-        el.scrollIntoView({behavior: "smooth", block: "center"});
-      } else {
-        el.classList.remove('active');
-      }
-    });
-  }
-
-  // Show question modal
-  function showQuestion(qObj) {
-    questionText.textContent = qObj.question;
-    optionsForm.innerHTML = '';
-    feedbackMessage.textContent = '';
-    submitBtn.disabled = true;
-
-    qObj.options.forEach((opt, i) => {
-      const label = document.createElement('label');
-      label.className = 'option';
-      const radio = document.createElement('input');
-      radio.type = 'radio';
-      radio.name = 'option';
-      radio.value = i;
-      label.appendChild(radio);
-      label.appendChild(document.createTextNode(opt));
-      optionsForm.appendChild(label);
-
-      radio.addEventListener('change', () => {
-        submitBtn.disabled = false;
-        feedbackMessage.textContent = '';
-      });
-    });
-
-    modalOverlay.style.display = 'flex';
-  }
-
-  // Hide question modal
-  function hideQuestion() {
-    modalOverlay.style.display = 'none';
-    feedbackMessage.textContent = '';
-    submitBtn.disabled = true;
-    optionsForm.innerHTML = '';
-  }
-
-  // Check answer and give feedback
-  function checkAnswer() {
-    const selected = optionsForm.querySelector('input[name="option"]:checked');
-    if (!selected) return;
-    const answer = parseInt(selected.value);
-    const correctAnswer = questions[currentQuestionIndex].correct;
-
-    if (answer === correctAnswer) {
-      feedbackMessage.style.color = 'green';
-      feedbackMessage.textContent = 'Correct!';
-      successSound.play();
-      // Close modal after short delay and resume audio
-      setTimeout(() => {
-        hideQuestion();
-        questionShown = false;
-        audio.play();
-        currentQuestionIndex++;
-      }, 1000);
-    } else {
-      feedbackMessage.style.color = 'red';
-      feedbackMessage.textContent = 'Please try again.';
-      errorSound.play();
-    }
-  }
-
-  // Update progress bar width
-  function updateProgressBar() {
-    const percent = (audio.currentTime / audio.duration) * 100;
-    progressBar.style.width = percent + '%';
-  }
-
-  // Listen to audio time updates
-  audio.addEventListener('timeupdate', () => {
-    const currentTime = audio.currentTime;
-    highlightTranscript(currentTime);
-    updateProgressBar();
-
-    if (currentQuestionIndex < questions.length && !questionShown) {
-      if (currentTime >= questions[currentQuestionIndex].time) {
-        // Pause audio and show question
-        audio.pause();
-        showQuestion(questions[currentQuestionIndex]);
-        questionShown = true;
-      }
-    }
-  });
-
   submitBtn.addEventListener('click', e => {
     e.preventDefault();
+    e.stopPropagation();
     checkAnswer();
   });
 
-  // After audio metadata loaded, add cue points (to get duration)
-  audio.addEventListener('loadedmetadata', () => {
-    addCuePoints();
-  });
+  // rest of your existing JavaScript remains unchanged
 </script>
 </body>
 </html>
